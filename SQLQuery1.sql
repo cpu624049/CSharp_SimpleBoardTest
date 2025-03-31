@@ -51,3 +51,14 @@ CREATE TABLE Board_CommentLikes (
     FOREIGN KEY (UserId) REFERENCES Board_Users(UserId)
 );
 
+CREATE TABLE Board_ReplyPosts (
+    ReplyPostId INT IDENTITY(1,1) PRIMARY KEY,
+    ParentPostId INT NOT NULL,           -- 원본 글 ID
+    UserId INT NOT NULL,                 -- 작성자
+    Title NVARCHAR(200) NOT NULL,        -- 제목 (일반 글과 동일)
+    Content NVARCHAR(MAX) NOT NULL,      -- 내용
+    CreatedAt DATETIME NOT NULL DEFAULT GETDATE(),
+    UpdatedAt DATETIME NULL,
+    FOREIGN KEY (ParentPostId) REFERENCES Board_Posts(PostId),
+    FOREIGN KEY (UserId) REFERENCES Users(UserId)
+);
