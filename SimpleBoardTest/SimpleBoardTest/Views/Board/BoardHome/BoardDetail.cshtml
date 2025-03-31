@@ -1,0 +1,51 @@
+﻿@model SimpleBoardTest.Models.Post
+
+@{
+	ViewData["Title"] = "게시글 상세";
+}
+
+<h2>@Model.Title</h2>
+<p><strong>작성자:</strong> @Model.User?.UserName</p>
+<p><strong>작성일:</strong> @Model.CreatedAt.ToString("yyyy-MM-dd HH:mm")</p>
+<p><strong>수정일:</strong> @Model.UpdatedAt?.ToString("yyyy-MM-dd HH:mm")</p>
+<p><strong>조회수:</strong> @Model.ViewCount</p>
+
+<hr />
+
+<div>
+	<p>@Model.Content</p>
+</div>
+
+<hr />
+
+<!-- ✅ 답글 작성 버튼 -->
+<div class="mb-3">
+	<a asp-controller="ReplyPost" asp-action="ReplyPostCreate" asp-route-parentPostId="@Model.PostId" class="btn btn-outline-secondary">답글 작성</a>
+</div>
+
+<!-- ✅ 답글 목록 출력 -->
+@if (Model.ReplyPosts != null && Model.ReplyPosts.Any())
+{
+	<div class="mt-4">
+		<h4>답글 목록</h4>
+		@foreach (var reply in Model.ReplyPosts)
+		{
+			<div class="card mb-2 ms-3">
+				<div class="card-body">
+					<h5 class="card-title">@reply.Title</h5>
+					<p class="card-text">@reply.Content</p>
+					<p class="text-muted small">작성일: @reply.CreatedAt.ToString("yyyy-MM-dd HH:mm")></p>
+
+					<form asp-controller="ReplyPost" asp-action="Delete" method="post">
+						<input type="hidden" name="id" value="@reply.UserId" />
+						<button class="btn btun-sm btn-danger">삭제</button>
+					</form>
+				</div>
+			</div>
+		}
+	</div>
+}
+
+<hr />
+
+<a asp-controller="Board" asp-action="BoardIndex">← 목록으로</a>

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SimpleBoardTest.Data;
+using SimpleBoardTest.Models;
 
 namespace SimpleBoardTest.Controllers
 {
@@ -14,16 +15,14 @@ namespace SimpleBoardTest.Controllers
 
         // 게시글 작성 화면
         [HttpGet]
-        public IActionResult Create(int? parentId = null)
+        public IActionResult PostCreate()
         {
-            ViewBag.ParentId = parentId; // 답글일 경우 부모 ID
-
-            return View();
+            return View("~/Views/Board/Post/PostCreate.cshtml");
         }
 
         // 게시글 작성 처리
         [HttpPost]
-        public async Task<IActionResult> Create(Post post)
+        public async Task<IActionResult> PostCreate(Post post)
         {
             if (ModelState.IsValid)
             {
@@ -32,15 +31,15 @@ namespace SimpleBoardTest.Controllers
                 _DbContext.Posts.Add(post);
                 await _DbContext.SaveChangesAsync();
 
-                return RedirectToAction("HomeIndex", "Home");
+                return RedirectToAction("BoardIndex", "Board");
             }
 
-            return View(post);
+            return View("~/Views/Board/BoardHome/BoardDetail.cshtml", post);
         }
 
         // 게시글 수정 화면
         [HttpGet]
-        public async Task<IActionResult> Edit(int id)
+        public async Task<IActionResult> PostEdit(int id)
         {
             var post = await _DbContext.Posts.FindAsync(id);
             if (post == null)
@@ -48,27 +47,27 @@ namespace SimpleBoardTest.Controllers
                 return NotFound();
             }
 
-            return View(post);
+            return View("~/Views/Board/Post/PostEdit.cshtml", post);
         }
 
         // 게시글 수정 처리
         [HttpPost]
-        public async Task<IActionResult> Edit(Post post)
+        public async Task<IActionResult> PostEdit(Post post)
         {
             if (ModelState.IsValid)
             {
                 _DbContext.Update(post);
                 await _DbContext.SaveChangesAsync();
-                
-                return RedirectToAction("HomeIndex", "Home");
+
+                return RedirectToAction("BoardIndex", "Board");
             }
 
-            return View(post);
+            return View("~/Views/Board/BoardHome/BoardDetail.cshtml", post);
         }
 
         // 게시글 삭제 처리
         [HttpPost]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> PostDelete(int id)
         {
             var post = await _DbContext.Posts.FindAsync(id);
             if (post == null)
@@ -79,7 +78,7 @@ namespace SimpleBoardTest.Controllers
             _DbContext.Posts.Remove(post);
             await _DbContext.SaveChangesAsync();
 
-            return RedirectToAction("HomeIndex", "Home");
+            return RedirectToAction("BoardIndex", "Board");
         }
     }
 }

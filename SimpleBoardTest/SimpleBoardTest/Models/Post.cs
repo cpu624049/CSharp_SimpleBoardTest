@@ -23,6 +23,8 @@
 
         public virtual ICollection<PostLike> PostLikes { get; set; } = new List<PostLike>();
 
+        public virtual ICollection<ReplyPost> ReplyPosts { get; set; } = new List<ReplyPost>();
+
 
     }
 }

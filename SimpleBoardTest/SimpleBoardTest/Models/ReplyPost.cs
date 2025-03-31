@@ -1,4 +1,6 @@
-﻿namespace SimpleBoardTest.Models
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace SimpleBoardTest.Models
 {
     public class ReplyPost
     {
@@ -17,6 +19,7 @@
         public DateTime? UpdatedAt { get; set; }
 
         // Navigation
+        [ForeignKey("ParentPostId")]
         public virtual Post ParentPost { get; set; } = null!;
 
         public virtual User User { get; set; } = null!;

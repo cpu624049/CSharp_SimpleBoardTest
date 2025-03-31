@@ -18,13 +18,13 @@ namespace SimpleBoardTest.Controllers
         {
             var posts = await _DbContext.Posts.Include(p => p.User).OrderByDescending(p => p.CreatedAt).ToListAsync();
 
-            return View(posts);
+            return View("~/Views/Board/BoardHome/BoardIndex.cshtml", posts);
         }
 
         // 게시글 상세 보기
         public async Task<IActionResult> Details(int id)
         {
-            var post = await _DbContext.Posts.Include(p => p.User).Include(p => p.Comments).FirstOrDefaultAsync(p => p.PostId == id);
+            var post = await _DbContext.Posts.Include(p => p.User).Include(p => p.Comments).Include(p => p.ReplyPosts).FirstOrDefaultAsync(p => p.PostId == id);
 
             if (post == null)
             {
