@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SimpleBoardTest.Data;
 using SimpleBoardTest.Models;
+using SimpleBoardTest.ViewModels;
 
 namespace SimpleBoardTest.Controllers
 {
@@ -22,19 +23,33 @@ namespace SimpleBoardTest.Controllers
 
         // 게시글 작성 처리
         [HttpPost]
-        public async Task<IActionResult> PostCreate(Post post)
+        public async Task<IActionResult> PostCreate(PostViewModel model)
         {
             if (ModelState.IsValid)
             {
-                post.CreatedAt = DateTime.Now;
-                post.UpdatedAt = DateTime.Now;
+                var userId = HttpContext.Session.GetInt32("UserId"); // 세션에서 UserId 가져오기
+
+                if (userId == null)
+                {
+                    return RedirectToAction("Login", "Account"); // 로그인 상태 확인
+                }
+
+                var post = new Post
+                {
+                    Title = model.Title,
+                    Content = model.Content,
+                    UserId = userId.Value,
+                    CreatedAt = DateTime.Now,
+                    UpdatedAt = DateTime.Now
+                };
+
                 _DbContext.Posts.Add(post);
                 await _DbContext.SaveChangesAsync();
 
                 return RedirectToAction("BoardIndex", "Board");
             }
 
-            return View("~/Views/Board/BoardHome/BoardDetail.cshtml", post);
+            return View("~/Views/Board/BoardHome/BoardDetail.cshtml", model);
         }
 
         // 게시글 수정 화면
