@@ -62,9 +62,9 @@ namespace SimpleBoardTest.Controllers
         {
             if (ModelState.IsValid)
             {
-                if (_DbContext.Users.Any(u => u.Email == model.Email))
+                if (await _DbContext.Users.AnyAsync(u => u.Email == model.Email))
                 {
-                    ModelState.AddModelError("", "이미 사용 중인 이메일 주소입니다.");
+                    ModelState.AddModelError("Email", "이미 사용 중인 이메일 주소입니다.");
 
                     return View("~/Views/Account/Register.cshtml", model);
                 }
@@ -74,13 +74,18 @@ namespace SimpleBoardTest.Controllers
                     UserName = model.UserName,
                     Email = model.Email,
                     Password = HashPassword(model.Password),
-                    CreatedAt = DateTime.Now
+                    CreatedAt = DateTime.Now,
+                    UpdatedAt = DateTime.Now
                 };
 
                 _DbContext.Users.Add(user);
                 await _DbContext.SaveChangesAsync();
 
-                return RedirectToAction("Login");
+                // 회원가입 후 자동 로그인
+                HttpContext.Session.SetInt32("UserId", user.UserId);
+                HttpContext.Session.SetString("UserName", user.UserName);
+
+                return RedirectToAction("BoardIndex", "Board");
             }
 
             return View("~/Views/Account/Register.cshtml", model);
