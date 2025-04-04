@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using SimpleBoardTest.Data;
 using SimpleBoardTest.Models;
 using SimpleBoardTest.ViewModels;
@@ -14,42 +15,50 @@ namespace SimpleBoardTest.Controllers
             _DbContext = DbContext;
         }
 
-        // 게시글 작성 화면
+        // 게시글/답글 작성 화면
         [HttpGet]
-        public IActionResult PostCreate()
+        public IActionResult PostCreate(int? parentPostId = null)
         {
+            ViewBag.ParentPostId = parentPostId; // 원글 ID (답글일 경우만 사용)
             return View("~/Views/Board/Post/PostCreate.cshtml");
         }
 
-        // 게시글 작성 처리
+        // 게시글/답글 작성 처리
         [HttpPost]
         public async Task<IActionResult> PostCreate(PostViewModel model)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                var userId = HttpContext.Session.GetInt32("UserId"); // 세션에서 UserId 가져오기
-
-                if (userId == null)
-                {
-                    return RedirectToAction("Login", "Account"); // 로그인 상태 확인
-                }
-
-                var post = new Post
-                {
-                    Title = model.Title,
-                    Content = model.Content,
-                    UserId = userId.Value,
-                    CreatedAt = DateTime.Now,
-                    UpdatedAt = DateTime.Now
-                };
-
-                _DbContext.Posts.Add(post);
-                await _DbContext.SaveChangesAsync();
-
-                return RedirectToAction("BoardIndex", "Board");
+                ViewBag.ParentPostId = model.ParentPostId;
+                return View("~/Views/Board/Post/PostCreate.cshtml", model);
             }
 
-            return View("~/Views/Board/BoardHome/BoardDetail.cshtml", model);
+            var userId = HttpContext.Session.GetInt32("UserId"); // 세션에서 UserId 가져오기
+
+            if (userId == null)
+            {
+                return RedirectToAction("Login", "Account"); // 로그인 상태 확인
+            }
+
+            var post = new Post
+            {
+                Title = model.Title,
+                Content = model.Content,
+                UserId = userId.Value,
+                ParentPostId = model.ParentPostId,
+                CreatedAt = DateTime.Now,
+                UpdatedAt = DateTime.Now
+            };
+
+            _DbContext.Posts.Add(post);
+            await _DbContext.SaveChangesAsync();
+
+            if (model.ParentPostId.HasValue)
+            {
+                return RedirectToAction("BoardDetails", "Board", new { id = model.ParentPostId });
+            }
+
+            return RedirectToAction("BoardIndex", "Board");
         }
 
         // 게시글 수정 화면
@@ -69,10 +78,34 @@ namespace SimpleBoardTest.Controllers
         [HttpPost]
         public async Task<IActionResult> PostEdit(Post post)
         {
+            var existingPost = await _DbContext.Posts.FindAsync(post.PostId);
+
+            if (existingPost == null)
+            {
+                return NotFound();
+            }
+
+            // 본인 글만 수정 가능
+            var userId = HttpContext.Session.GetInt32("UserId");
+            if (userId == null || existingPost.UserId != userId)
+            {
+                return Unauthorized();
+            }
+
             if (ModelState.IsValid)
             {
+                existingPost.Title = post.Title;
+                existingPost.Content = post.Content;
+                existingPost.UpdatedAt = DateTime.Now;
+
                 _DbContext.Update(post);
                 await _DbContext.SaveChangesAsync();
+
+                // 답글이면 원글로 이동
+                if (existingPost.ParentPostId.HasValue)
+                {
+                    return RedirectToAction("BoardDetails", "Board", new { id = existingPost.ParentPostId });
+                }
 
                 return RedirectToAction("BoardIndex", "Board");
             }
@@ -84,14 +117,39 @@ namespace SimpleBoardTest.Controllers
         [HttpPost]
         public async Task<IActionResult> PostDelete(int id)
         {
-            var post = await _DbContext.Posts.FindAsync(id);
+            var post = await _DbContext.Posts.Include(p => p.Replies).FirstOrDefaultAsync(p => p.PostId == id);
+
             if (post == null)
             {
                 return NotFound();
             }
 
-            _DbContext.Posts.Remove(post);
+            var userId = HttpContext.Session.GetInt32("UserId");
+            if (userId == null || post.UserId != userId)
+            {
+                return Unauthorized();
+            }
+
+            if (post.Replies.Any())
+            {
+                // 답글 존재 시 내용 대체
+                post.Title = "[삭제된 글입니다]";
+                post.Content = "[삭제된 글입니다]";
+                post.UpdatedAt = DateTime.Now;
+
+                _DbContext.Posts.Update(post);
+            }
+            else
+            {
+                _DbContext.Posts.Remove(post);
+            }
+
             await _DbContext.SaveChangesAsync();
+
+            if (post.ParentPostId.HasValue)
+            {
+                return RedirectToAction("BoardDetails", "Board", new { id = post.ParentPostId });
+            }
 
             return RedirectToAction("BoardIndex", "Board");
         }

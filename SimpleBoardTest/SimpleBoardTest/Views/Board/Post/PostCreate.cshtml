@@ -1,13 +1,20 @@
-﻿@model SimpleBoardTest.Models.Post
+﻿@model SimpleBoardTest.ViewModels.PostViewModel
 
 @{
-	ViewBag.Title = "게시글 작성";
+	ViewBag.Title = Model?.ParentPostId.HasValue == true ? "답글 작성" : "게시글 작성";
 }
 
 <div class="container mt-4">
 	<h2>@ViewBag.Title</h2>
 
 	<form asp-action="PostCreate" method="post">
+
+		@* 답글일 경우 상위 PostId를 hidden으로 전송 *@
+		@if (ViewBag.ParentPostId != null)
+		{
+			<input type="hidden" asp-formaction="ParentPostId" value="@ViewBag.ParentPostId" />
+		}
+
 		<div class="mb-3">
 			<label asp-for="Title" class="form-label">제목</label>
 			<input asp-for="Title" class="form-control" />
@@ -24,3 +31,8 @@
 		<a asp-controller="Board" asp-action="BoardIndex" class="btn btn-secondary">취소</a>
 	</form>
 </div>
+
+@section Scripts
+{
+	<partial name="_ValidationScriptsPartial" />
+}

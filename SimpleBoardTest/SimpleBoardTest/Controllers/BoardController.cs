@@ -24,7 +24,7 @@ namespace SimpleBoardTest.Controllers
         // 게시글 상세 보기
         public async Task<IActionResult> Details(int id)
         {
-            var post = await _DbContext.Posts.Include(p => p.User).Include(p => p.Comments).Include(p => p.ReplyPosts).FirstOrDefaultAsync(p => p.PostId == id);
+            var post = await _DbContext.Posts.Include(p => p.User).Include(p => p.Comments).FirstOrDefaultAsync(p => p.PostId == id);
 
             if (post == null)
             {
@@ -35,7 +35,7 @@ namespace SimpleBoardTest.Controllers
             post.ViewCount++;
             await _DbContext.SaveChangesAsync();
 
-            return View(post);
+            return View("~/Views/Board/BoardHome/BoardDetail.cshtml",post);
         }
     }
 }

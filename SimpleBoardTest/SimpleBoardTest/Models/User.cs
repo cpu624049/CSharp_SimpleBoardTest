@@ -12,7 +12,6 @@
         // Navigation
         public virtual ICollection<Post> Posts { get; set; } = new List<Post>();
         public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
-        public virtual ICollection<PostLike> PostLikes { get; set; } = new List<PostLike>();
-        public virtual ICollection<CommentLike> CommentLikes { get; set; } = new List<CommentLike>();
+        public virtual ICollection<Like> Likes { get; set; } = new List<Like>();
     }
 }
