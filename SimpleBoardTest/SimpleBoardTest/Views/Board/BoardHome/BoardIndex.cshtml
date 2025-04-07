@@ -27,7 +27,14 @@
 		{
 			<tr>
 				<td>@post.PostId</td>
-				<td><a href="@Url.Action("Details","Board",new { id = post.PostId })">@post.Title</a></td>
+				<td>
+					<!-- ✅ 답글일 경우 들여쓰기 + Re: 표시 -->
+					@if (post.ParentPostId != null)
+					{
+						<span style="padding-left: 20px;">Re: </span>
+					}
+					<a href="@Url.Action("Details","Board",new { id = post.PostId })">@post.Title</a>
+					</td>
 				<td>@post.User?.UserName</td>
 				<td>@post.ViewCount</td>
 				<td>@post.CreatedAt.ToString("yyyy-MM-dd")</td>

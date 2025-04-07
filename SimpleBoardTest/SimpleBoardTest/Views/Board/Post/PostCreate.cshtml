@@ -8,12 +8,8 @@
 	<h2>@ViewBag.Title</h2>
 
 	<form asp-action="PostCreate" method="post">
-
-		@* 답글일 경우 상위 PostId를 hidden으로 전송 *@
-		@if (ViewBag.ParentPostId != null)
-		{
-			<input type="hidden" asp-formaction="ParentPostId" value="@ViewBag.ParentPostId" />
-		}
+		@* ✅ 답글인 경우에도 ViewModel 바인딩 방식으로 처리 *@
+		<input type="hidden" asp-for="ParentPostId" />
 
 		<div class="mb-3">
 			<label asp-for="Title" class="form-label">제목</label>

@@ -19,7 +19,11 @@ namespace SimpleBoardTest.Controllers
         [HttpGet]
         public IActionResult PostCreate(int? parentPostId = null)
         {
-            ViewBag.ParentPostId = parentPostId; // 원글 ID (답글일 경우만 사용)
+            var model = new PostViewModel
+            {
+                ParentPostId = parentPostId
+            };
+
             return View("~/Views/Board/Post/PostCreate.cshtml");
         }
 
@@ -44,8 +48,8 @@ namespace SimpleBoardTest.Controllers
             {
                 Title = model.Title,
                 Content = model.Content,
-                UserId = userId.Value,
-                ParentPostId = model.ParentPostId,
+                UserId = userId.Value, // 세션에서 가져온 UserId
+                ParentPostId = model.ParentPostId, // 답글일 경우 원글 ID
                 CreatedAt = DateTime.Now,
                 UpdatedAt = DateTime.Now
             };
@@ -53,12 +57,7 @@ namespace SimpleBoardTest.Controllers
             _DbContext.Posts.Add(post);
             await _DbContext.SaveChangesAsync();
 
-            if (model.ParentPostId.HasValue)
-            {
-                return RedirectToAction("BoardDetails", "Board", new { id = model.ParentPostId });
-            }
-
-            return RedirectToAction("BoardIndex", "Board");
+            return RedirectToAction("Details", "Board", new { id = post.PostId });
         }
 
         // 게시글 수정 화면
@@ -101,13 +100,7 @@ namespace SimpleBoardTest.Controllers
                 _DbContext.Update(post);
                 await _DbContext.SaveChangesAsync();
 
-                // 답글이면 원글로 이동
-                if (existingPost.ParentPostId.HasValue)
-                {
-                    return RedirectToAction("BoardDetails", "Board", new { id = existingPost.ParentPostId });
-                }
-
-                return RedirectToAction("BoardIndex", "Board");
+                return RedirectToAction("Details", "Board", new { id = post.PostId });
             }
 
             return View("~/Views/Board/BoardHome/BoardDetail.cshtml", post);

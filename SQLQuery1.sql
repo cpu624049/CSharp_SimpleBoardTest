@@ -62,3 +62,12 @@ CREATE TABLE Board_ReplyPosts (
     FOREIGN KEY (ParentPostId) REFERENCES Board_Posts(PostId),
     FOREIGN KEY (UserId) REFERENCES Users(UserId)
 );
+
+
+ALTER TABLE Board_Posts ADD ParentPostId INT NULL;
+
+ALTER TABLE Board_Posts ADD CONSTRAINT FK_Board_Posts_ParentPost FOREIGN KEY (ParentPostId) REFERENCES Board_Posts(PostId);
+
+SELECT COLUMN_NAME 
+FROM INFORMATION_SCHEMA.COLUMNS 
+WHERE TABLE_NAME = 'Board_Posts';

@@ -6,6 +6,26 @@
 
 <div class="contailner mt-4">
 
+	<!-- ✅ 원글 정보 표시 -->
+	@if (Model.ParentPost != null)
+	{
+		<div class="alert alert-light">
+			🔁 원글:
+			@if (string.IsNullOrWhiteSpace(Model.ParentPost.Title) || Model.ParentPost.Title == "[삭제된 글입니다]")
+			{
+				<a asp-controller="Board" asp-action="Details" asp-route-id="@Model.ParentPost.PostId" class="text-primary fw-bold">
+					[삭제된 글입니다]
+				</a>
+			}
+			else
+			{
+				<a asp-controller="Board" asp-action="Details" asp-route-id="@Model.ParentPost.PostId" class="text-primary fw-bold">
+					@Model.ParentPost.Title
+				</a>
+			}
+		</div>
+	}
+
 	<!-- ✅ 삭제된 글 표시 -->
 	@if (Model.Title == "[삭제된 글입니다]" && Model.Content == "[삭제된 글입니다]")
 	{
@@ -52,24 +72,17 @@
 						<h5 class="card-title">
 							@if (reply.Title == "[삭제된 글입니다]")
 							{
-								<span class="text-muted">[삭제된 답글입니다]</span>
+								<a asp-controller="Board" asp-action="Details" asp-route-id="@reply.PostId">
+									[삭제된 글입니다]
+								</a>
 							}
 							else
 							{
-								@reply.Title
+								<a asp-controller="Board" asp-action="Details" asp-route-id="@reply.PostId">
+									@reply.Title
+								</a>
 							}
 						</h5>
-
-						<p class="card-text">
-							@if (reply.Content == "[삭제된 글입니다]")
-							{
-								<span class="text-muted">이 답글은 삭제되었습니다.</span>
-							}
-							else
-							{
-								@reply.Content
-							}
-						</p>
 
 						<p class="text-muted small">작성일 : @reply.CreatedAt.ToString("yyyy-MM-dd HH:mm")</p>
 
