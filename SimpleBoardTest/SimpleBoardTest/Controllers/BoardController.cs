@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SimpleBoardTest.Data;
+using SimpleBoardTest.Models;
 
 namespace SimpleBoardTest.Controllers
 {
@@ -21,7 +22,9 @@ namespace SimpleBoardTest.Controllers
                 .OrderByDescending(p => p.CreatedAt)
                 .ToListAsync();
 
-            return View("~/Views/Board/BoardHome/BoardIndex.cshtml", posts);
+            var sortedPosts = SortPostsHierarchically(posts);
+
+            return View("~/Views/Board/BoardHome/BoardIndex.cshtml", sortedPosts);
         }
 
         // 게시글 상세 보기
@@ -45,6 +48,27 @@ namespace SimpleBoardTest.Controllers
             await _DbContext.SaveChangesAsync();
 
             return View("~/Views/Board/BoardHome/BoardDetail.cshtml", post);
+        }
+
+        // 게시글을 계층 구조로 정렬하는 재귀 메서드
+        private List<Post> SortPostsHierarchically(List<Post> allPosts, int? parentId = null, int depth = 0)
+        {
+            List<Post> sorted = new();
+
+            var children = allPosts
+                .Where(p => p.ParentPostId == parentId)
+                .OrderByDescending(p => p.CreatedAt) // 최신순 정렬
+                .ToList();
+
+            foreach (var post in children)
+            {
+                string indent = string.Concat(Enumerable.Repeat("&nbsp;&nbsp;&nbsp;&nbsp;", depth));
+                post.Title = $"{indent}{(depth > 0 ? "👉 Re: " : "")}{post.Title}";
+                sorted.Add(post);
+                sorted.AddRange(SortPostsHierarchically(allPosts, post.PostId, depth + 1));
+            }
+
+            return sorted;
         }
     }
 }
