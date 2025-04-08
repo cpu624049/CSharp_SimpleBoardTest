@@ -46,6 +46,7 @@ namespace SimpleBoardTest.Controllers
                 ModelState.AddModelError("", "이메일 또는 비밀번호가 일치하지 않습니다.");
             }
 
+            await Task.CompletedTask; // 비동기 메서드로 변경
             return View("~/Views/Account/Login.cshtml", model);
         }
 

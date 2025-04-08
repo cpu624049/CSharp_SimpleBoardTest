@@ -32,12 +32,16 @@ namespace SimpleBoardTest.Controllers
         public async Task<IActionResult> Details(int id)
         {
             var post = await _DbContext.Posts
-                .Include(p => p.User) // ✅ 게시글 작성자
-                .Include(p => p.ParentPost) // ✅ 원글
-                .Include(p => p.Replies) // ✅ 답글
-                    .ThenInclude(r => r.User) // ✅ 답글 작성자
-                .Include(p => p.Comments) // ✅ 댓글
-                .FirstOrDefaultAsync(p => p.PostId == id); // 게시글 ID로 조회
+                .Include(p => p.User)                       // ✅ 게시글 작성자
+                .Include(p => p.ParentPost)                 // ✅ 원글
+                .Include(p => p.Replies)                    // ✅ 답글
+                    .ThenInclude(r => r.User)                   // ✅ 답글 작성자
+                .Include(p => p.Comments)                   // ✅ 댓글
+                    .ThenInclude(c => c.User)                   // ✅ 댓글 작성자
+                .Include(p => p.Comments)                   // ✅ 댓글
+                    .ThenInclude(c => c.Replies)                // ✅ 대댓글
+                        .ThenInclude(rc => rc.User)                 // ✅ 대댓글 작성자
+                .FirstOrDefaultAsync(p => p.PostId == id);  // 게시글 ID로 조회
 
             if (post == null)
             {
@@ -47,6 +51,11 @@ namespace SimpleBoardTest.Controllers
             // 조회수 증가
             post.ViewCount++;
             await _DbContext.SaveChangesAsync();
+
+            // 댓글 정렬
+            Dictionary<int, int> commentDepths = new();
+            post.Comments = SortCommentsHierarchically(post.Comments.ToList(), null, 0, commentDepths);
+            ViewBag.CommentDepths = commentDepths;
 
             return View("~/Views/Board/BoardHome/BoardDetail.cshtml", post);
         }
@@ -63,10 +72,30 @@ namespace SimpleBoardTest.Controllers
 
             foreach (var post in children)
             {
-                string indent = string.Concat(Enumerable.Repeat("&nbsp;&nbsp;&nbsp;&nbsp;", depth));
+                string indent = string.Concat(Enumerable.Repeat("&nbsp;&nbsp;&nbsp;&nbsp;", depth)); // 들여쓰기
                 post.Title = $"{indent}{(depth > 0 ? "👉 Re: " : "")}{post.Title}";
                 sorted.Add(post);
                 sorted.AddRange(SortPostsHierarchically(allPosts, post.PostId, depth + 1));
+            }
+
+            return sorted;
+        }
+
+        // 댓글을 계층 구조로 정렬하는 재귀 메서드
+        private List<Comment> SortCommentsHierarchically(List<Comment> allComments, int? parentId, int depth, Dictionary<int, int> depthMap)
+        {
+            var sorted = new List<Comment>();
+
+            var children = allComments
+                .Where(c => c.ParentCommentId == parentId)
+                .OrderByDescending(c => c.CreatedAt) // 최신순 정렬
+                .ToList();
+
+            foreach (var comment in children)
+            {
+                depthMap[comment.CommentId] = depth;
+                sorted.Add(comment);
+                sorted.AddRange(SortCommentsHierarchically(allComments, comment.CommentId, depth + 1, depthMap));
             }
 
             return sorted;

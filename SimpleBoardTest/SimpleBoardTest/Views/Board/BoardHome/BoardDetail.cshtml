@@ -4,6 +4,7 @@
 	ViewData["Title"] = "게시글 상세";
 	var currentUserId = Context.Session.GetInt32("UserId"); // 현재 로그인한 사용자 ID
 	var isOwner = currentUserId != null && currentUserId == Model.UserId; // 본인 여부 확인
+	var commentDepths = ViewBag.CommentDepths as Dictionary<int, int> ?? new Dictionary<int, int>(); // 댓글 깊이 정보
 }
 
 <div class="contailner mt-4">
@@ -79,12 +80,49 @@
 
 		<hr />
 
-		<!-- ✅ 댓글 및 대댓글 목록 -->
+		<!-- ✅ 댓글 출력 -->
 		@if (Model.Comments != null && Model.Comments.Any())
 		{
-			@foreach (var comment in Model.Comments.Where(c => c.ParentCommentId == null). OrderByDescending(c => c.CreatedAt))
+			foreach (var comment in Model.Comments)
 			{
-				<partial name="_CommentPartial" model="comment" />
+				var depth = commentDepths.ContainsKey(comment.CommentId) ? commentDepths[comment.CommentId] : 0;
+				var indentClass = "ms-" + (depth * 3);
+
+				<div class="mb-3 @indentClass border p-2 rounded bg-light">
+					<p class="mb-1">
+						<strong>@comment.User?.UserName</strong>
+						<small class="text-muted">@comment.CreatedAt.ToString("yyyy-MM-dd HH:mm")</small>
+					</p>
+					<p>@comment.Content</p>
+
+					<!-- ✅ 수정/삭제 -->
+					@if (currentUserId == comment.UserId)
+					{
+						<button class="btn btn-sm btn-outline-secondary" onclick="toggleEditForm(@comment.CommentId)">수정</button>
+						<form asp-controller="Comment" asp-action="Delete" method="post" class="d-inline ms-1" onsubmit="return confirm('댓글을 삭제하시겠습니까?');">
+							<input type="hidden" name="commentId" value="@comment.CommentId" />
+							<button type="submit" class="btn btn-sm btn-danger">삭제</button>
+						</form>
+
+						<!-- ✅ 수정 폼 -->
+						<div id="editForm-@comment.CommentId" class="mt-2 d-none">
+							<form asp-controller="Comment" asp-action="Edit" method="post">
+								<input type="hidden" name="commentId" value="@comment.CommentId" />
+								<textarea class="form-control mb-2" name="content">@comment.Content</textarea>
+								<button type="submit" class="btn btn-sm btn-success">저장</button>
+								<button type="button" class="btn btn-sm btn-secondary" onclick="toggleEditForm(@comment.CommentId)">취소</button>
+							</form>
+						</div>
+					}
+
+					<!-- ✅ 대댓글 폼 -->
+					<form asp-controller="Comment" asp-action="Create" method="post" class="mt-2">
+						<input type="hidden" name="postId" value="@comment.PostId" />
+						<input type="hidden" name="parentCommentId" value="@comment.CommentId" />
+						<textarea class="form-control mb-1" name="content" rows="2" placeholder="댓글을 입력하세요..."></textarea>
+						<button type="submit" class="btn btn-sm btn-outline-primary">댓글 작성</button>
+					</form>
+				</div>
 			}
 		}
 	</div>
@@ -148,3 +186,14 @@
 
 	<a asp-controller="Board" asp-action="BoardIndex">← 목록으로</a>
 </div>
+
+@section Scripts {
+	<script>
+		function toggleEditForm(commentId) {
+			var form = document.getElementById("editForm-" + commentId);
+			if (form) {
+				form.classList.toggle("d-none");
+			}
+		}
+	</script>
+}
