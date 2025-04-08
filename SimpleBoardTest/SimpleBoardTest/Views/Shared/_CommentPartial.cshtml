@@ -1,0 +1,62 @@
+﻿@model SimpleBoardTest.Models.Comment
+
+@{
+	var currentUserId = Context.Session.GetInt32("UserId");
+	var isOwner = currentUserId != null && currentUserId == Model.UserId;
+}
+
+<div class="mb-3 ms-3 border p-2 rounded bg-light">
+	<p class="mb-1">
+		<strong>@Model.User?.UserName</strong>
+		<small class="text-muted">@Model.CreatedAt.ToString("yyyy-MM-dd HH:mm")</small>
+	</p>
+	<p>@Model.Content</p>
+
+	<!-- ✅ 수정 / 삭제 버튼 -->
+	@if (isOwner)
+	{
+		<button class="btn btn-sm btn-outline-secondary" onclick="toggleEditForm(@Model.CommentId)">수정</button>
+		<form asp-controller="Comment" asp-action="Delete" method="post" class="d-inline ms-1" onsubmit="return confirm('댓글을 삭제하시겠습니까?');">
+			<input type="hidden" name="commentId" value="@Model.CommentId" />
+			<button type="submit" class="btn btn-sm btn-danger">삭제</button>
+		</form>
+	}
+
+	<!-- ✅ 대댓글 입력 폼 -->
+	<form asp-controller="Comment" asp-action="Create" method="post" class="mt-2 ms-4">
+		<input type="hidden" name="postId" value="@Model.PostId" />
+		<input type="hidden" name="parentCommentId" value="@Model.CommentId" />
+		<textarea class="form-control mb-1" name="content" rows="2" placeholder="댓글 작성..."></textarea>
+		<button type="submit" class="btn btn-sm btn-outline-primary">댓글 등록</button>
+	</form>
+
+	<!-- ✅ 수정 폼 (숨김) -->
+	<div id="editForm-@Model.CommentId" class="mt-2 d-none">
+		<form asp-controller="Comment" asp-action="Edit" method="post">
+			<input type="hidden" name="commentId" value="@Model.CommentId" />
+			<textarea class="form-control mb-2" name="content">@Model.Content</textarea>
+			<button type="submit" class="btn btn-sm btn-success">저장</button>
+			<button type="button" class="btn btn-sm btn-secondary" onclick="toggleEditForm(@Model.CommentId)">취소</button>
+		</form>
+	</div>
+
+	<!-- ✅ 대댓글 재귀 출력 -->
+	@if (Model.Replies != null && Model.Replies.Any())
+	{
+		foreach (var reply in Model.Replies.OrderBy(r => r.CreatedAt))
+		{
+			<partial name="_CommentPartial" model="reply" />
+		}
+	}
+</div>
+
+@section Scripts {
+	<script>
+		function toggleEditForm(commentId) {
+			var form = document.getElementById("editForm-" + commentId);
+			if (form) {
+				form.classList.toggle("d-none");
+			}
+		}
+	</script>
+}

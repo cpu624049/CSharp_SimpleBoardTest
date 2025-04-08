@@ -66,6 +66,31 @@
 
 	<hr />
 
+	<!-- ✅ 댓글 영역 -->
+	<div class="mt-5">
+		<h4>댓글</h4>
+
+		<!-- ✅ 댓글 입력 폼 -->
+		<form asp-controller="Comment" asp-action="Create" method="post">
+			<input type="hidden" name="postId" value="@Model.PostId" />
+			<textarea class="form-control mb-2" name="content" rows="3" placeholder="댓글을 입력하세요"></textarea>
+			<button type="submit" class="btn btn-sm btn-primary">댓글 작성</button>
+		</form>
+
+		<hr />
+
+		<!-- ✅ 댓글 및 대댓글 목록 -->
+		@if (Model.Comments != null && Model.Comments.Any())
+		{
+			@foreach (var comment in Model.Comments.Where(c => c.ParentCommentId == null). OrderByDescending(c => c.CreatedAt))
+			{
+				<partial name="_CommentPartial" model="comment" />
+			}
+		}
+	</div>
+
+	<hr />
+
 	<!-- ✅ 답글 작성 버튼 (삭제된 글이면 비활성화) -->
 	@if (!(Model.Title == "[삭제된 글입니다]" && Model.Content == "[삭제된 글입니다]"))
 	{

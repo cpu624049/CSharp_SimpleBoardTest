@@ -18,6 +18,7 @@
 			<th>제목</th>
 			<th>작성자</th>
 			<th>조회수</th>
+			<th>댓글 수</th>
 			<th>작성일</th>
 			<th>수정일</th>
 		</tr>
@@ -32,6 +33,7 @@
 				</td>
 				<td>@post.User?.UserName</td>
 				<td>@post.ViewCount</td>
+				<td>@post.Comments.Count()</td>
 				<td>@post.CreatedAt.ToString("yyyy-MM-dd")</td>
 				<td>@post.UpdatedAt?.ToString("yyyy-MM-dd")</td>
 			</tr>

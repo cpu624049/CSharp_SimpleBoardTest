@@ -19,6 +19,7 @@ namespace SimpleBoardTest.Controllers
         {
             var posts = await _DbContext.Posts
                 .Include(p => p.User)
+                .Include(p => p.Comments) // ✅ 댓글
                 .OrderByDescending(p => p.CreatedAt)
                 .ToListAsync();
 
