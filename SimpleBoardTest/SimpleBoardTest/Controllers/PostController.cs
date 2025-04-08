@@ -97,7 +97,7 @@ namespace SimpleBoardTest.Controllers
                 existingPost.Content = post.Content;
                 existingPost.UpdatedAt = DateTime.Now;
 
-                _DbContext.Update(post);
+                _DbContext.Update(existingPost); // 수정된 기존 엔티티 저장
                 await _DbContext.SaveChangesAsync();
 
                 return RedirectToAction("Details", "Board", new { id = post.PostId });

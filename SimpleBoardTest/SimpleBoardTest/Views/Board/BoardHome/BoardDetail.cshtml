@@ -2,6 +2,8 @@
 
 @{
 	ViewData["Title"] = "게시글 상세";
+	var currentUserId = Context.Session.GetInt32("UserId"); // 현재 로그인한 사용자 ID
+	var isOwner = currentUserId != null && currentUserId == Model.UserId; // 본인 여부 확인
 }
 
 <div class="contailner mt-4">
@@ -47,6 +49,19 @@
 		<div>
 			<p>@Model.Content</p>
 		</div>
+
+		<!-- ✅ 본인만 수정/삭제 버튼 노출 -->
+		@if (isOwner)
+		{
+			<div class="d-flex gap-2 mt-3">
+				<a asp-asp-controller="Post" asp-action="PostEdit" asp-route-itemid="@Model.PostId" class="btn btn-sm btn-warning">수정</a>
+
+				<form as-asp-controller="Post" asp-action="PostDelete" method="post" onsubmit="return confirm('정말 삭제하시겠습니까?');">
+					<input type="hidden" name="id" value="@Model.PostId" />
+					<button type="submit" class="btn btn-sm btn-danger">삭제</button>
+				</form>
+			</div>
+		}
 	}
 
 	<hr />
@@ -67,6 +82,9 @@
 
 			@foreach (var reply in Model.Replies)
 			{
+				var replyOwnerId = reply.UserId;
+				var isReplyOwner = currentUserId != null && currentUserId == replyOwnerId; // 답글 작성자 본인 여부 확인
+
 				<div class="card mb-2 ms-3">
 					<div class="card-body">
 						<h5 class="card-title">
@@ -86,11 +104,15 @@
 
 						<p class="text-muted small">작성일 : @reply.CreatedAt.ToString("yyyy-MM-dd HH:mm")</p>
 
-						<!-- ✅ 답글 삭제 버튼 -->
-						<form asp-controller="Post" asp-action="PostDelete" method="post">
-							<input type="hidden" name="id" value="@reply.PostId" />
-							<button type="submit" class="btn btn-sm btn-danger">삭제</button>
-						</form>
+
+						<!-- ✅ 본인일 경우에만 답글 삭제 가능 -->
+						@if (isReplyOwner)
+						{
+							<form asp-controller="Post" asp-action="PostDelete" method="post" onsubmit="return confirm('정말 삭제하시겠습니까?');">
+								<input type="hidden" name="id" value="@reply.PostId" />
+								<button type="submit" class="btn btn-sm btn-danger">삭제</button>
+							</form>
+						}
 					</div>
 				</div>
 			}
