@@ -40,7 +40,7 @@ namespace SimpleBoardTest.Controllers
                     HttpContext.Session.SetInt32("UserId", user.UserId);
                     HttpContext.Session.SetString("UserName", user.UserName);
 
-                    return RedirectToAction("BoardIndex", "Board");
+                    return RedirectToAction("Index", "Board");
                 }
 
                 ModelState.AddModelError("", "이메일 또는 비밀번호가 일치하지 않습니다.");
@@ -86,7 +86,7 @@ namespace SimpleBoardTest.Controllers
                 HttpContext.Session.SetInt32("UserId", user.UserId);
                 HttpContext.Session.SetString("UserName", user.UserName);
 
-                return RedirectToAction("BoardIndex", "Board");
+                return RedirectToAction("Index", "Board");
             }
 
             return View("~/Views/Account/Register.cshtml", model);

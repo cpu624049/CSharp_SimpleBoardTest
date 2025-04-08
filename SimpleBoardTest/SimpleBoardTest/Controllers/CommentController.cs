@@ -24,7 +24,7 @@ namespace SimpleBoardTest.Controllers
             {
                 TempData["Error"] = "내용을 입력해주세요.";
 
-                return RedirectToAction("Details", "Board", new { id = postId });
+                return RedirectToAction("Detail", "Board", new { id = postId });
             }
 
             var comment = new Comment
@@ -39,7 +39,7 @@ namespace SimpleBoardTest.Controllers
             _DbContext.Comments.Add(comment);
             await _DbContext.SaveChangesAsync();
 
-            return RedirectToAction("Details", "Board", new { id = postId });
+            return RedirectToAction("Detail", "Board", new { id = postId });
         }
 
         // ✅ 댓글 수정
@@ -62,7 +62,7 @@ namespace SimpleBoardTest.Controllers
             {
                 TempData["Error"] = "내용을 입력해주세요.";
 
-                return RedirectToAction("Details", "Board", new { id = comment.PostId });
+                return RedirectToAction("Detail", "Board", new { id = comment.PostId });
             }
 
             comment.Content = content;
@@ -71,7 +71,7 @@ namespace SimpleBoardTest.Controllers
             _DbContext.Comments.Update(comment);
             await _DbContext.SaveChangesAsync();
 
-            return RedirectToAction("Details", "Board", new { id = comment.PostId });
+            return RedirectToAction("Detail", "Board", new { id = comment.PostId });
         }
 
         // ✅ 댓글 삭제
@@ -90,7 +90,7 @@ namespace SimpleBoardTest.Controllers
             _DbContext.Comments.Remove(comment);
             await _DbContext.SaveChangesAsync();
 
-            return RedirectToAction("Details", "Board", new { id = comment.PostId });
+            return RedirectToAction("Detail", "Board", new { id = comment.PostId });
         }
     }
 }

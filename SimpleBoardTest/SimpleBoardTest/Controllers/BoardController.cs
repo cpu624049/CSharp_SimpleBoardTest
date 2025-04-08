@@ -15,7 +15,7 @@ namespace SimpleBoardTest.Controllers
         }
 
         // 게시글 목록
-        public async Task<IActionResult> BoardIndex()
+        public async Task<IActionResult> Index()
         {
             var posts = await _DbContext.Posts
                 .Include(p => p.User)
@@ -25,11 +25,11 @@ namespace SimpleBoardTest.Controllers
 
             var sortedPosts = SortPostsHierarchically(posts);
 
-            return View("~/Views/Board/BoardHome/BoardIndex.cshtml", sortedPosts);
+            return View("~/Views/Board/Index.cshtml", sortedPosts);
         }
 
         // 게시글 상세 보기
-        public async Task<IActionResult> Details(int id)
+        public async Task<IActionResult> Detail(int id)
         {
             var post = await _DbContext.Posts
                 .Include(p => p.User)                       // ✅ 게시글 작성자
@@ -57,7 +57,7 @@ namespace SimpleBoardTest.Controllers
             post.Comments = SortCommentsHierarchically(post.Comments.ToList(), null, 0, commentDepths);
             ViewBag.CommentDepths = commentDepths;
 
-            return View("~/Views/Board/BoardHome/BoardDetail.cshtml", post);
+            return View("~/Views/Board/Post/Detail.cshtml", post);
         }
 
         // 게시글을 계층 구조로 정렬하는 재귀 메서드

@@ -2,31 +2,88 @@
 
 @{
 	ViewData["Title"] = "로그인";
+	Layout = null;
 }
 
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>로그인</title>
 
-<div class="row">
-	<div class="col-md-4 offset-md-4">
-		<h2>로그인</h2>
-		<form asp-action="Login" method="post">
-			<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+	<!-- AdminLTE CSS -->
+	<link rel="stylesheet" href="~/plugins/fontawesome-free/css/all.min.css" />
+	<link rel="stylesheet" href="~/plugins/icheck-bootstrap/icheck-bootstrap.min.css" />
+	<link rel="stylesheet" href="~/dist/css/adminlte.min.css" />
 
-			<div class="form-group">
-				<label asp-for="Email">이메일</label>
-				<input asp-for="Email" class="form-control" />
-				<span asp-validation-for="Email" class="text-danger"></span>
+	<!-- 사용자 정의 CSS -->
+	<link rel="stylesheet" href="~/css/site.css" asp-append-asp-append-version="true" />
+</head>
+<body class="hold-transition login-page">
+	<div class="login-box">
+		<div class="card card-outline card-primary">
+			<div class="card-header text-center">
+				<a href="/" class="h1"><b>Simple</b>Board</a>
 			</div>
+			<div class="card-body">
+				<p class="login-box-msg">로그인 정보를 입력해주세요</p>
 
-			<div class="form-group">
-				<label asp-for="Password">비밀번호</label>
-				<input asp-for="Password" class="form-control" />
-				<span asp-validation-for="Password" class="text-danger"></span>
-			</div>
+				<form asp-action="Login" method="post">
+					<div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
 
-			<div class="form-group mt-3">
-				<button type="submit" class="btn btn-primary">로그인</button>
-				<a asp-action="Register" class="btn btn-link">회원가입</a>
+					<!-- 이메일 입력 -->
+					<div class="input-group mb-3">
+						<input asp-for="Email" class="form-control" placeholder="Email" />
+						<div class="input-group-append">
+							<div class="input-group-text">
+								<span class="fas fa-envelope"></span>
+							</div>
+						</div>
+					</div>
+					<span asp-validation-for="Email" class="text-danger"></span>
+
+					<!-- 비밀번호 입력 -->
+					<div class="input-group mb-3">
+						<input asp-for="Password" class="form-control" placeholder="Password" />
+						<div class="input-group-append">
+							<div class="input-group-text">
+								<span class="fas fa-lock"></span>
+							</div>
+						</div>
+					</div>
+					<span asp-validation-for="Password" class="text-danger"></span>
+
+					<!-- 로그인 및 Remember Me -->
+					<div class="row mb-3">
+						<div class="col-8">
+							<div class="icheck-primary">
+								<input type="checkbox" id="remember" />
+								<label for="remember">
+									로그인 상태 유지
+								</label>
+							</div>
+						</div>
+						<div class="col-4">
+							<button type="submit" class="btn btn-primary btn-block">로그인</button>
+						</div>
+					</div>
+				</form>
+
+				<p class="mb-1">
+					<a asp-action="Register">회원가입</a>
+				</p>
 			</div>
-		</form>
+		</div>
 	</div>
-</div>
+
+	<!-- AdminLTE JS -->
+	<script src="~/plugins/jquery/jquery.min.js"></script>
+	<script src="~/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+	<script src="~/dist/js/adminlte.min.js"></script>
+
+	<!-- 유효성 검사용 스크립트 -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/4.0.0/jquery.validate.unobtrusive.min.js"></script>
+</body>
+</html>

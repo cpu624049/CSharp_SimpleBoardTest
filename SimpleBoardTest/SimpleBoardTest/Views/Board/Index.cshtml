@@ -1,0 +1,74 @@
+﻿@model IEnumerable<SimpleBoardTest.Models.Post>
+@{
+	ViewData["Title"] = "게시판 목록";
+}
+
+<div class="card">
+	<div class="card-header d-flex justify-content-between align-items-center">
+		<h3 class="card-title">📋 게시판 목록</h3>
+		<a asp-controller="Post" asp-action="Create" class="btn btn-sm btn-primary">
+			<i class="fas fa-pen"></i> 글쓰기
+		</a>
+	</div>
+
+	<div class="card-body">
+		<table id="boardTable" class="table table-bordered table-hover">
+			<thead>
+				<tr>
+					<th>번호</th>
+					<th>제목</th>
+					<th>작성자</th>
+					<th>조회수</th>
+					<th>댓글 수</th>
+					<th>작성일</th>
+					<th>수정일</th>
+				</tr>
+			</thead>
+			<tbody>
+				@foreach (var post in Model)
+				{
+					<tr>
+						<td>@post.PostId</td>
+						<td>
+							<a href="@Url.Action("Detail", "Board", new { id = post.PostId })">
+								@Html.Raw(post.Title)
+							</a>
+						</td>
+						<td>@post.User?.UserName</td>
+						<td>@post.ViewCount</td>
+						<td>@post.Comments?.Count()</td>
+						<td>@post.CreatedAt.ToString("yyyy-MM-dd")</td>
+						<td>@post.UpdatedAt?.ToString("yyyy-MM-dd")</td>
+					</tr>
+				}
+			</tbody>
+		</table>
+	</div>
+</div>
+
+@section Scripts {
+	<!-- DataTables Scripts -->
+	<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
+	<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+	<script>
+		$(document).ready(function () {
+			$('#boardTable').DataTable({
+				"language": {
+					"search": "검색:",
+					"lengthMenu": "_MENU_ 개씩 보기",
+					"zeroRecords": "일치하는 게시글이 없습니다.",
+					"info": "_TOTAL_개 중 _START_부터 _END_까지 표시",
+					"infoEmpty": "데이터 없음",
+					"infoFiltered": "(전체 _MAX_개에서 필터링됨)",
+					"paginate": {
+						"first": "처음",
+						"last": "마지막",
+						"next": "다음",
+						"previous": "이전"
+					}
+				}
+			});
+		});
+	</script>
+}

@@ -1,0 +1,46 @@
+﻿@model SimpleBoardTest.ViewModels.PostViewModel
+@{
+	ViewBag.Title = Model?.ParentPostId.HasValue == true ? "답글 작성" : "게시글 작성";
+	ViewData["Title"] = ViewBag.Title;
+}
+
+<div class="card">
+	<div class="card-header">
+		<h3 class="card-title">@ViewBag.Title</h3>
+	</div>
+
+	<div class="card-body">
+		<form asp-action="Create" method="post">
+			<!-- ✅ 답글일 경우 원글 ID 포함 -->
+			<input type="hidden" asp-for="ParentPostId" />
+
+			<!-- 제목 -->
+			<div class="mb-3">
+				<label asp-for="Title" class="form-label">제목</label>
+				<input asp-for="Title" class="form-control" placeholder="제목을 입력하세요" />
+				<span asp-validation-for="Title" class="text-danger"></span>
+			</div>
+
+			<!-- 내용 -->
+			<div class="mb-3">
+				<label asp-for="Content" class="form-label">내용</label>
+				<textarea asp-for="Content" class="form-control" rows="6" placeholder="내용을 입력하세요"></textarea>
+				<span asp-validation-for="Content" class="text-danger"></span>
+			</div>
+
+			<!-- 버튼 -->
+			<div class="mt-4">
+				<button type="submit" class="btn btn-primary btn-sm">
+					<i class="fas fa-save"></i> 작성
+				</button>
+				<a asp-controller="Board" asp-action="Index" class="btn btn-secondary btn-sm">
+					<i class="fas fa-times"></i> 취소
+				</a>
+			</div>
+		</form>
+	</div>
+</div>
+
+@section Scripts {
+	<partial name="_ValidationScriptsPartial" />
+}

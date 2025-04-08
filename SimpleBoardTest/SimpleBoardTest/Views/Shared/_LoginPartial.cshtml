@@ -7,19 +7,27 @@
 	@if (userId != null)
 	{
 		<li class="nav-item">
-			<span class="nav-link text-dark">👤 @userName 님</span>
+			<span class="nav-link text-dark">
+				<i class="fas fa-user"></i> @userName 님
+			</span>
 		</li>
 		<li class="nav-item">
-			<a class="nav-link text-dark" asp-controller="Account" asp-action="Logout">로그아웃</a>
+			<a class="nav-link text-dark" asp-controller="Account" asp-action="Logout">
+				<i class="fas fa-sign-out-alt"></i> 로그아웃
+			</a>
 		</li>
 	}
 	else
 	{
 		<li class="nav-item">
-			<a class="nav-link text-dark" asp-controller="Account" asp-action="Register">회원가입</a>
+			<a class="nav-link text-dark" asp-controller="Account" asp-action="Register">
+				<i class="fas fa-user-plus"></i> 회원가입
+			</a>
 		</li>
 		<li class="nav-item">
-			<a class="nav-link text-dark" asp-controller="Account" asp-action="Login">로그인</a>
+			<a class="nav-link text-dark" asp-controller="Account" asp-action="Login">
+				<i class="fas fa-sign-in-alt"></i> 로그인
+			</a>
 		</li>
 	}
 </ul>

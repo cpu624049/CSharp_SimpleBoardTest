@@ -13,7 +13,7 @@ namespace SimpleBoardTest.Controllers
             _logger = logger;
         }
 
-        public IActionResult HomeIndex()
+        public IActionResult Index()
         {
             return View();
         }
