@@ -91,17 +91,11 @@ namespace SimpleBoardTest.Controllers
                 return Unauthorized();
             }
 
-            if (ModelState.IsValid)
-            {
-                existingPost.Title = post.Title;
-                existingPost.Content = post.Content;
-                existingPost.UpdatedAt = DateTime.Now;
+            existingPost.Title = post.Title;
+            existingPost.Content = post.Content;
+            existingPost.UpdatedAt = DateTime.Now;
 
-                _DbContext.Update(existingPost); // 수정된 기존 엔티티 저장
-                await _DbContext.SaveChangesAsync();
-
-                return RedirectToAction("Detail", "Board", new { id = post.PostId });
-            }
+            await _DbContext.SaveChangesAsync();
 
             return RedirectToAction("Detail", "Board", new { id = post.PostId });
         }

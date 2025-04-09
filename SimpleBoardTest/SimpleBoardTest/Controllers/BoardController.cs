@@ -25,7 +25,7 @@ namespace SimpleBoardTest.Controllers
 
             var sortedPosts = SortPostsHierarchically(posts);
 
-            return View("~/Views/Board/Index.cshtml", sortedPosts);
+            return View("~/Views/Board/Post/Index.cshtml", sortedPosts);
         }
 
         // 게시글 상세 보기

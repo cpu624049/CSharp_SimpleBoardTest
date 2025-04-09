@@ -80,14 +80,13 @@ namespace SimpleBoardTest.Controllers
         {
             var comment = await _DbContext.Comments.FindAsync(commentId);
             if (comment == null)
+            {
                 return NotFound();
+            }
 
-            var userId = HttpContext.Session.GetInt32("UserId");
-            if (comment.UserId != userId)
-                return Forbid();
+            comment.IsDeleted = true;
+            comment.Content = "[삭제된 댓글입니다.]";
 
-            // 실제 삭제 대신 논리 삭제로 처리해도 가능
-            _DbContext.Comments.Remove(comment);
             await _DbContext.SaveChangesAsync();
 
             return RedirectToAction("Detail", "Board", new { id = comment.PostId });

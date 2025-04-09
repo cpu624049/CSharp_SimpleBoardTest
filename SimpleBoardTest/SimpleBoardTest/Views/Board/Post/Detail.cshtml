@@ -4,7 +4,6 @@
 	ViewData["Title"] = "게시글 상세";
 	var currentUserId = Context.Session.GetInt32("UserId");
 	var isOwner = currentUserId != null && currentUserId == Model.UserId;
-	var commentDepths = ViewBag.CommentDepths as Dictionary<int, int> ?? new Dictionary<int, int>();
 }
 
 <div class="container-fluid">
@@ -64,44 +63,10 @@
 	{
 		<hr />
 		<h5 class="mt-4 mb-3">댓글 목록</h5>
-		@foreach (var comment in Model.Comments)
+
+		@foreach (var comment in Model.Comments.OrderBy(c => c.CreatedAt))
 		{
-			var depth = commentDepths.ContainsKey(comment.CommentId) ? commentDepths[comment.CommentId] : 0;
-			var indentClass = "ms-" + (depth * 3);
-
-			<div class="card mb-2 @indentClass">
-				<div class="card-body bg-light">
-					<p class="mb-1"><strong>@comment.User?.UserName</strong> <small class="text-muted">@comment.CreatedAt.ToString("yyyy-MM-dd HH:mm")</small></p>
-					<p>@comment.Content</p>
-
-					@if (currentUserId == comment.UserId)
-					{
-						<button class="btn btn-sm btn-outline-secondary" onclick="toggleEditForm(@comment.CommentId)">수정</button>
-						<form asp-controller="Comment" asp-action="Delete" method="post" class="d-inline ms-1" onsubmit="return confirm('댓글을 삭제하시겠습니까?');">
-							<input type="hidden" name="commentId" value="@comment.CommentId" />
-							<button type="submit" class="btn btn-sm btn-danger">삭제</button>
-						</form>
-
-						<!-- 수정 폼 -->
-						<div id="editForm-@comment.CommentId" class="mt-2 d-none">
-							<form asp-controller="Comment" asp-action="Edit" method="post">
-								<input type="hidden" name="commentId" value="@comment.CommentId" />
-								<textarea class="form-control mb-2" name="content">@comment.Content</textarea>
-								<button type="submit" class="btn btn-sm btn-success">저장</button>
-								<button type="button" class="btn btn-sm btn-secondary" onclick="toggleEditForm(@comment.CommentId)">취소</button>
-							</form>
-						</div>
-					}
-
-					<!-- 대댓글 입력 -->
-					<form asp-controller="Comment" asp-action="Create" method="post" class="mt-2">
-						<input type="hidden" name="postId" value="@comment.PostId" />
-						<input type="hidden" name="parentCommentId" value="@comment.CommentId" />
-						<textarea class="form-control mb-1" name="content" rows="2" placeholder="대댓글 작성..."></textarea>
-						<button type="submit" class="btn btn-sm btn-outline-primary">작성</button>
-					</form>
-				</div>
-			</div>
+			<partial name="~/Views/Comment/_CommentPartial.cshtml" model="comment" />
 		}
 	}
 
