@@ -54,6 +54,16 @@
 	<script>
 		$(document).ready(function () {
 			$('#boardTable').DataTable({
+				order: [[5, 'desc']],	// 정렬 기준 (작성일 기준 내림차순)
+										// 정렬 index
+										// 0: 번호
+										// 1: 제목
+										// 2: 작성자
+										// 3: 조회수
+										// 4: 댓글 수
+										// 5: 작성일
+										// 6: 수정일
+
 				"language": {
 					"search": "검색:",
 					"lengthMenu": "_MENU_ 개씩 보기",

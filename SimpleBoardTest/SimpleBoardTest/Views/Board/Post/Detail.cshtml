@@ -30,7 +30,7 @@
 			<p><strong>수정일:</strong> @Model.UpdatedAt?.ToString("yyyy-MM-dd HH:mm")</p>
 			<p><strong>조회수:</strong> @Model.ViewCount</p>
 			<hr />
-			<p>@Model.Content</p>
+			<p>@Html.Raw(Model.Content)</p>
 		</div>
 		<div class="card-footer">
 			@if (isOwner)

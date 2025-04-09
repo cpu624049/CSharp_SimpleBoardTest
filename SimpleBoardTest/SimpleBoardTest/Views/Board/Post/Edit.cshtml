@@ -43,5 +43,18 @@
 </div>
 
 @section Scripts {
+	<script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
+	<script>
+		ClassicEditor
+		.create(document.querySelector('#Content'),{
+			ckfinder: {
+				uploadUrl: '/File/Upload' // 업로드 컨트롤러 연결
+			}
+		})
+		.catch(Error => {
+			console.error(error);
+		});
+	</script>
+
 	<partial name="_ValidationScriptsPartial" />
 }
