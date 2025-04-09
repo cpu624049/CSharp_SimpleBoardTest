@@ -18,7 +18,11 @@ namespace SimpleBoardTest.Controllers
         public async Task<IActionResult> Create(int postId, int? parentCommentId, string content)
         {
             var userId = HttpContext.Session.GetInt32("UserId");
-            if (userId == null) return RedirectToAction("Login", "Account");
+
+            if (userId == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
 
             if (string.IsNullOrWhiteSpace(content))
             {

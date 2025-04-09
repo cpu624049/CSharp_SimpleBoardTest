@@ -50,7 +50,14 @@
 				uploadUrl: '/File/Upload' // 업로드 컨트롤러 연결
 			}
 		})
-		.catch(Error => {
+		.then(editor => {
+			// ✅ 에디터 내부 스크롤을 위한 최소 높이 설정
+			const editable = editor.ui.getEditableElement();
+			editable.style.minHeight = '500px';
+			editable.style.maxHeight = '500px';
+			editable.style.overflowY = 'auto';
+		})
+		.catch(error => {
 			console.error(error);
 		});
 	</script>

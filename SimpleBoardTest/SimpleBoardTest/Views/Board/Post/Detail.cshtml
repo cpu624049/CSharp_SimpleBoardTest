@@ -61,13 +61,17 @@
 	<!-- ✅ 댓글 목록 -->
 	@if (Model.Comments != null && Model.Comments.Any())
 	{
-		<hr />
 		<h5 class="mt-4 mb-3">댓글 목록</h5>
-
-		@foreach (var comment in Model.Comments.OrderBy(c => c.CreatedAt))
+		@foreach (var comment in Model.Comments
+				.Where(c => c.ParentCommentId == null)
+				.OrderBy(c => c.CreatedAt))
 		{
 			<partial name="~/Views/Comment/_CommentPartial.cshtml" model="comment" />
 		}
+	}
+	else
+	{
+		<p class="text-muted">아직 댓글이 없습니다.</p>
 	}
 
 	<!-- ✅ 답글 작성 -->
@@ -119,6 +123,11 @@
 		function toggleEditForm(commentId) {
 			const form = document.getElementById("editForm-" + commentId);
 			if (form) form.classList.toggle("d-none");
+		}
+
+		function toggleReplyForm(commentId) {
+			const replyForm = document.getElementById("replyForm-" + commentId);
+			if (replyForm) replyForm.classList.toggle("d-none");
 		}
 	</script>
 }
