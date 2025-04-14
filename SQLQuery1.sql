@@ -165,51 +165,54 @@
 
 -----------------------------------------------
 
--- 1~3번 UserId, 랜덤 제목/내용을 포함한 게시글 200개 삽입
-DECLARE @i INT = 1;
+---- 1~3번 UserId, 랜덤 제목/내용을 포함한 게시글 200개 삽입
+--DECLARE @i INT = 1;
 
--- 단어 리스트 테이블 변수 선언
-DECLARE @WordTable TABLE (Id INT IDENTITY(1,1), Word NVARCHAR(50));
-INSERT INTO @WordTable (Word)
-VALUES 
-    (N'고양이'), (N'강아지'), (N'AI'), (N'데이터'), (N'분석'), 
-    (N'테스트'), (N'샘플'), (N'속도'), (N'기록'), (N'프로그래밍'),
-    (N'자동화'), (N'보안'), (N'API'), (N'클라우드'), (N'챗봇');
+---- 단어 리스트 테이블 변수 선언
+--DECLARE @WordTable TABLE (Id INT IDENTITY(1,1), Word NVARCHAR(50));
+--INSERT INTO @WordTable (Word)
+--VALUES 
+--    (N'고양이'), (N'강아지'), (N'AI'), (N'데이터'), (N'분석'), 
+--    (N'테스트'), (N'샘플'), (N'속도'), (N'기록'), (N'프로그래밍'),
+--    (N'자동화'), (N'보안'), (N'API'), (N'클라우드'), (N'챗봇');
 
--- 루프 삽입 시작
-WHILE @i <= 200
-BEGIN
-    DECLARE @Random1 INT = FLOOR(RAND(CHECKSUM(NEWID())) * 15) + 1;
-    DECLARE @Random2 INT = FLOOR(RAND(CHECKSUM(CONVERT(varchar(36), NEWID()) + '1')) * 15) + 1;
-    DECLARE @Random3 INT = FLOOR(RAND(CHECKSUM(CONVERT(varchar(36), NEWID()) + '2')) * 15) + 1;
-    DECLARE @Random4 INT = FLOOR(RAND(CHECKSUM(CONVERT(varchar(36), NEWID()) + '3')) * 15) + 1;
+---- 루프 삽입 시작
+--WHILE @i <= 200
+--BEGIN
+--    DECLARE @Random1 INT = FLOOR(RAND(CHECKSUM(NEWID())) * 15) + 1;
+--    DECLARE @Random2 INT = FLOOR(RAND(CHECKSUM(CONVERT(varchar(36), NEWID()) + '1')) * 15) + 1;
+--    DECLARE @Random3 INT = FLOOR(RAND(CHECKSUM(CONVERT(varchar(36), NEWID()) + '2')) * 15) + 1;
+--    DECLARE @Random4 INT = FLOOR(RAND(CHECKSUM(CONVERT(varchar(36), NEWID()) + '3')) * 15) + 1;
 
-    DECLARE @Title NVARCHAR(200);
-    DECLARE @Content NVARCHAR(MAX);
-    DECLARE @UserId INT = FLOOR(RAND(CHECKSUM(NEWID())) * 3) + 1;
-    DECLARE @ViewCount INT = FLOOR(RAND(CHECKSUM(NEWID())) * 100);
+--    DECLARE @Title NVARCHAR(200);
+--    DECLARE @Content NVARCHAR(MAX);
+--    DECLARE @UserId INT = FLOOR(RAND(CHECKSUM(NEWID())) * 3) + 1;
+--    DECLARE @ViewCount INT = FLOOR(RAND(CHECKSUM(NEWID())) * 100);
 
-    -- 제목 조합
-    SELECT @Title = CONCAT('글: ', w1.Word, ' ', w2.Word)
-    FROM @WordTable w1, @WordTable w2
-    WHERE w1.Id = @Random1 AND w2.Id = @Random2;
+--    -- 제목 조합
+--    SELECT @Title = CONCAT('글: ', w1.Word, ' ', w2.Word)
+--    FROM @WordTable w1, @WordTable w2
+--    WHERE w1.Id = @Random1 AND w2.Id = @Random2;
 
-    -- 내용 조합
-    SELECT @Content = CONCAT('내용: ', w3.Word, '와 ', w4.Word, '에 대한 설명입니다.')
-    FROM @WordTable w3, @WordTable w4
-    WHERE w3.Id = @Random3 AND w4.Id = @Random4;
+--    -- 내용 조합
+--    SELECT @Content = CONCAT('내용: ', w3.Word, '와 ', w4.Word, '에 대한 설명입니다.')
+--    FROM @WordTable w3, @WordTable w4
+--    WHERE w3.Id = @Random3 AND w4.Id = @Random4;
 
-    -- 게시글 삽입
-    INSERT INTO dbo.Board_Posts (UserId, ParentPostId, Title, Content, ViewCount, CreatedAt, UpdatedAt)
-    VALUES (
-        @UserId,
-        NULL,
-        @Title,
-        @Content,
-        @ViewCount,
-        GETDATE(),
-        GETDATE()
-    );
+--    -- 게시글 삽입
+--    INSERT INTO dbo.Board_Posts (UserId, ParentPostId, Title, Content, ViewCount, CreatedAt, UpdatedAt)
+--    VALUES (
+--        @UserId,
+--        NULL,
+--        @Title,
+--        @Content,
+--        @ViewCount,
+--        GETDATE(),
+--        GETDATE()
+--    );
 
-    SET @i += 1;
-END
+--    SET @i += 1;
+--END
+
+-----------------------------------------------
+

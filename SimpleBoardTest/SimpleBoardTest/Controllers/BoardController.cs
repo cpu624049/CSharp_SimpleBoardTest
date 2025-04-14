@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using SimpleBoardTest.Data;
 using SimpleBoardTest.Models;
+using SimpleBoardTest.ViewModels;
 
 namespace SimpleBoardTest.Controllers
 {
@@ -14,45 +15,80 @@ namespace SimpleBoardTest.Controllers
             _DbContext = DbContext;
         }
 
-        // 게시글 목록
+        // ✅ 게시글 목록
         public async Task<IActionResult> Index()
         {
             var posts = await _DbContext.Posts
                 .Include(p => p.User)
-                .Include(p => p.Comments) // ✅ 댓글
+                .Include(p => p.Comments)
                 .OrderByDescending(p => p.CreatedAt)
                 .ToListAsync();
 
             var sortedPosts = SortPostsHierarchically(posts);
-
             return View("~/Views/Board/Post/Index.cshtml", sortedPosts);
         }
 
-        // 게시글 상세 보기
+        // ✅ 게시글 상세 보기
         public async Task<IActionResult> Detail(int id)
         {
-            var post = await _DbContext.Posts
-                .Include(p => p.User)                       // ✅ 게시글 작성자
-                .Include(p => p.ParentPost)                 // ✅ 원글
-                .Include(p => p.Replies)                    // ✅ 답글
-                    .ThenInclude(r => r.User)                   // ✅ 답글 작성자
-                .Include(p => p.Comments)                   // ✅ 댓글
-                    .ThenInclude(c => c.User)                   // ✅ 댓글 작성자
-                .Include(p => p.Comments)                   // ✅ 댓글
-                    .ThenInclude(c => c.Replies)                // ✅ 대댓글
-                        .ThenInclude(rc => rc.User)                 // ✅ 대댓글 작성자
-                .FirstOrDefaultAsync(p => p.PostId == id);  // 게시글 ID로 조회
+            var userId = HttpContext.Session.GetInt32("UserId");
 
-            if (post == null)
+            var post = await _DbContext.Posts
+                .Include(p => p.User)
+                .Include(p => p.ParentPost)
+                .Include(p => p.Replies).ThenInclude(r => r.User)
+                .Include(p => p.Comments).ThenInclude(c => c.User)
+                .Include(p => p.Comments).ThenInclude(c => c.Replies).ThenInclude(rc => rc.User)
+                .FirstOrDefaultAsync(p => p.PostId == id);
+
+            if (post == null) return NotFound();
+
+            // ✅ 게시글 좋아요
+            var likeCount = await _DbContext.Likes
+                .CountAsync(l => l.TargetType == "Post" && l.TargetId == post.PostId);
+
+            var isLiked = userId.HasValue &&
+                await _DbContext.Likes.AnyAsync(l => l.TargetType == "Post" && l.TargetId == post.PostId && l.UserId == userId);
+
+            ViewBag.PostLike = new LikeViewModel
             {
-                return NotFound();
+                TargetType = "Post",
+                TargetId = post.PostId,
+                LikeCount = likeCount,
+                IsLiked = isLiked
+            };
+
+            // ✅ 댓글 좋아요
+            var commentIds = post.Comments.Select(c => c.CommentId).ToList();
+
+            Dictionary<int, int> commentLikes = new();
+            List<int> likedCommentIds = new();
+
+            if (commentIds.Any())
+            {
+                commentLikes = _DbContext.Likes
+                    .Where(l => l.TargetType == "Comment" && commentIds.Contains(l.TargetId))
+                    .AsEnumerable()
+                    .GroupBy(l => l.TargetId)
+                    .ToDictionary(g => g.Key, g => g.Count());
+
+                if (userId.HasValue)
+                {
+                    likedCommentIds = await _DbContext.Likes
+                        .Where(l => l.TargetType == "Comment" && commentIds.Contains(l.TargetId) && l.UserId == userId)
+                        .Select(l => l.TargetId)
+                        .ToListAsync();
+                }
             }
 
-            // 조회수 증가
+            ViewBag.CommentLikeCounts = commentLikes;
+            ViewBag.CommentLikedIds = likedCommentIds;
+
+            // ✅ 조회수 증가
             post.ViewCount++;
             await _DbContext.SaveChangesAsync();
 
-            // 댓글 정렬
+            // ✅ 댓글 정렬 (계층 구조)
             Dictionary<int, int> commentDepths = new();
             post.Comments = SortCommentsHierarchically(post.Comments.ToList(), null, 0, commentDepths);
             ViewBag.CommentDepths = commentDepths;
@@ -60,19 +96,19 @@ namespace SimpleBoardTest.Controllers
             return View("~/Views/Board/Post/Detail.cshtml", post);
         }
 
-        // 게시글을 계층 구조로 정렬하는 재귀 메서드
+        // ✅ 게시글 계층 정렬
         private List<Post> SortPostsHierarchically(List<Post> allPosts, int? parentId = null, int depth = 0)
         {
             List<Post> sorted = new();
 
             var children = allPosts
                 .Where(p => p.ParentPostId == parentId)
-                .OrderByDescending(p => p.CreatedAt) // 최신순 정렬
+                .OrderByDescending(p => p.CreatedAt)
                 .ToList();
 
             foreach (var post in children)
             {
-                string indent = string.Concat(Enumerable.Repeat("&nbsp;&nbsp;&nbsp;&nbsp;", depth)); // 들여쓰기
+                string indent = string.Concat(Enumerable.Repeat("&nbsp;&nbsp;&nbsp;&nbsp;", depth));
                 post.Title = $"{indent}{(depth > 0 ? "👉 Re: " : "")}{post.Title}";
                 sorted.Add(post);
                 sorted.AddRange(SortPostsHierarchically(allPosts, post.PostId, depth + 1));
@@ -81,14 +117,14 @@ namespace SimpleBoardTest.Controllers
             return sorted;
         }
 
-        // 댓글을 계층 구조로 정렬하는 재귀 메서드
+        // ✅ 댓글 계층 정렬
         private List<Comment> SortCommentsHierarchically(List<Comment> allComments, int? parentId, int depth, Dictionary<int, int> depthMap)
         {
             var sorted = new List<Comment>();
 
             var children = allComments
                 .Where(c => c.ParentCommentId == parentId)
-                .OrderByDescending(c => c.CreatedAt) // 최신순 정렬
+                .OrderByDescending(c => c.CreatedAt)
                 .ToList();
 
             foreach (var comment in children)

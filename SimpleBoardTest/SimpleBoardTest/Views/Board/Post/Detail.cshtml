@@ -1,9 +1,12 @@
 ﻿@model SimpleBoardTest.Models.Post
+@using SimpleBoardTest.ViewModels
 
 @{
 	ViewData["Title"] = "게시글 상세";
 	var currentUserId = Context.Session.GetInt32("UserId");
 	var isOwner = currentUserId != null && currentUserId == Model.UserId;
+	var postLike = ViewBag.PostLike as LikeViewModel;
+	var likedClass = postLike != null && postLike.IsLiked ? "btn-danger" : "btn-outline-danger";
 }
 
 <div class="container-fluid">
@@ -48,6 +51,13 @@
 		</div>
 	</div>
 
+	<!-- ✅ 좋아요 기능 -->
+	<div class="mb-3">
+		<button class="btn btn-sm @likedClass like-btn" data-type="@postLike?.TargetType" data-id="@postLike?.TargetId">
+			❤ 좋아요 (<span class="like-count">@postLike?.LikeCount</span>)
+		</button>
+	</div>
+
 	<!-- ✅ 댓글 입력 -->
 	<div class="mt-5">
 		<h4><i class="fas fa-comments"></i> 댓글 작성</h4>
@@ -66,7 +76,7 @@
 				.Where(c => c.ParentCommentId == null)
 				.OrderBy(c => c.CreatedAt))
 		{
-			<partial name="~/Views/Comment/_CommentPartial.cshtml" model="comment" />
+			<partial name="~/Views/Board/Comment/_CommentPartial.cshtml" model="comment" />
 		}
 	}
 	else
@@ -129,5 +139,30 @@
 			const replyForm = document.getElementById("replyForm-" + commentId);
 			if (replyForm) replyForm.classList.toggle("d-none");
 		}
+
+		// ✅ 좋아요 버튼 클릭 이벤트
+		$(document).on('click', '.like-btn', function () {
+			const btn = $(this);
+			const type = btn.data('type');
+			const id = btn.data('id');
+
+			$.post('/Like/Toggle', {
+				targetType: type,
+				targetId: id
+			}, function (res) {
+				if (res.success) {
+					const countSpan = btn.find('.like-count');
+					countSpan.text(res.likeCount);
+
+					if (res.isLiked) {
+						btn.removeClass("btn-outline-danger btn-outline-secondary").addClass("btn-danger");
+					} else {
+						btn.removeClass("btn-danger").addClass("btn-outline-danger");
+					}
+				} else {
+					alert(res.message);
+				}
+			});
+		});
 	</script>
 }

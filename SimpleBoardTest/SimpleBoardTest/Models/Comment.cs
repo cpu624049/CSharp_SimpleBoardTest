@@ -16,6 +16,5 @@
         public virtual User User { get; set; } = null!;
         public virtual Comment? ParentComment { get; set; }
         public virtual ICollection<Comment> Replies { get; set; } = new List<Comment>();
-        public virtual ICollection<Like> Likes { get; set; } = new List<Like>();
     }
 }

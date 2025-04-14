@@ -17,7 +17,6 @@ namespace SimpleBoardTest.Models
         // Navigation
         public virtual User User { get; set; } = null!;
         public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
-        public virtual ICollection<Like> Likes { get; set; } = new List<Like>();
 
         // 자기참조 (답글)
         [ForeignKey("ParentPostId")]
