@@ -59,25 +59,28 @@ namespace SimpleBoardTest.Controllers
             };
 
             // ✅ 댓글 좋아요
-            var commentIds = post.Comments.Select(c => c.CommentId).ToList();
-
             Dictionary<int, int> commentLikes = new();
             List<int> likedCommentIds = new();
 
+            var commentIds = post.Comments.Select(c => c.CommentId).ToList();
+
             if (commentIds.Any())
             {
-                commentLikes = _DbContext.Likes
+                var likeList = await _DbContext.Likes
                     .Where(l => l.TargetType == "Comment" && commentIds.Contains(l.TargetId))
-                    .AsEnumerable()
+                    .ToListAsync();
+
+                commentLikes = likeList
                     .GroupBy(l => l.TargetId)
                     .ToDictionary(g => g.Key, g => g.Count());
 
                 if (userId.HasValue)
                 {
-                    likedCommentIds = await _DbContext.Likes
-                        .Where(l => l.TargetType == "Comment" && commentIds.Contains(l.TargetId) && l.UserId == userId)
+                    likedCommentIds = likeList
+                        .Where(l => l.UserId == userId)
                         .Select(l => l.TargetId)
-                        .ToListAsync();
+                        .Distinct()
+                        .ToList();
                 }
             }
 
