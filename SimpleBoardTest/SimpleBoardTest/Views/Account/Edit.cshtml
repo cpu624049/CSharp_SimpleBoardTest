@@ -1,0 +1,48 @@
+﻿@model SimpleBoardTest.ViewModels.UserEditViewModel
+
+@{
+	ViewData["Title"] = "회원 정보 수정";
+}
+
+<div class="container mt-4">
+	<h2 class="mb-4">회원 정보 수정</h2>
+
+	@if (TempData["SuccessMessage"] != null)
+	{
+		<div class="alert alert-success">@TempData["SuccessMessage"]</div>
+	}
+
+	<form asp-action="Edit" method="post">
+		<input type="hidden" asp-for="UserId" />
+
+		<div class="mb-3">
+			<label asp-for="UserName" class="form-label">닉네임</label>
+			<input asp-for="UserName" class="form-control" />
+			<span asp-validation-for="UserName" class="text-danger"></span>
+		</div>
+
+		<div class="mb-3">
+			<label asp-for="Email" class="form-label">이메일</label>
+			<input asp-for="Email" class="form-control" />
+			<span asp-validation-for="Email" class="text-danger"></span>
+		</div>
+
+		<div class="mb-3">
+			<label asp-for="NewPassword" class="form-label">새 비밀번호 (선택)</label>
+			<input asp-for="NewPassword" class="form-control" />
+			<span asp-validation-for="NewPassword" class="text-danger"></span>
+		</div>
+
+		<div class="mb-3">
+			<label asp-for="ConfirmPassword" class="form-label">비밀번호 확인</label>
+			<input asp-for="ConfirmPassword" class="form-control" />
+			<span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+		</div>
+
+		<button type="submit" class="btn btn-primary">수정하기</button>
+	</form>
+</div>
+
+@section Scripts {
+	<partial name="_ValidationScriptsPartial" />
+}

@@ -1,7 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using System.Text;
-using Azure.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SimpleBoardTest.Data;
@@ -99,6 +97,73 @@ namespace SimpleBoardTest.Controllers
 
             return RedirectToAction("Login");
         }
+
+        // 회원정보 수정 페이지
+        [HttpGet]
+        public async Task<IActionResult> Edit()
+        {
+            var userId = HttpContext.Session.GetInt32("UserId");
+            if (userId == null)
+            {
+                return RedirectToAction("Login");
+            }
+
+            var user = await _DbContext.Users.FindAsync(userId);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var model = new UserEditViewModel
+            {
+                UserId = user.UserId,
+                UserName = user.UserName,
+                Email = user.Email
+            };
+
+            return View("~/Views/Account/Edit.cshtml", model);
+        }
+
+        // 회원정보 수정 처리
+        [HttpPost]
+        public async Task<IActionResult> Edit(UserEditViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View("~/Views/Account/Edit.cshtml", model);
+            }
+
+            var user = await _DbContext.Users.FindAsync(model.UserId);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            // 로그인한 사용자가 본인 정보만 수정 가능하게 제약
+            var sessionUserId = HttpContext.Session.GetInt32("UserId");
+            if (sessionUserId != user.UserId)
+            {
+                return Unauthorized();
+            }
+
+            user.UserName = model.UserName;
+            user.Email = model.Email;
+            user.UpdatedAt = DateTime.Now;
+
+            // 비밀번호 수정이 요청된 경우만 변경
+            if (!string.IsNullOrWhiteSpace(model.NewPassword))
+            {
+                user.Password = HashPassword(model.NewPassword);
+            }
+
+            await _DbContext.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "회원정보가 수정되었습니다.";
+            HttpContext.Session.SetString("UserName", user.UserName); // 세션 업데이트
+
+            return RedirectToAction("Edit");
+        }
+
 
         // 비밀번호 해시 함수
         private string HashPassword(string password)
